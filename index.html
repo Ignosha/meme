@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Powerball Pattern Lab</title>
+  <meta name="description" content="Tests every Powerball draw from the official NY Open Data feed for patterns, and checks whether any prediction method beats chance.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="wrap">
+    <h1>Powerball Pattern Lab</h1>
+    <p class="lede">Pulls every published Powerball draw live from the free
+      <a href="https://data.ny.gov/Government-Finance/Lottery-Powerball-Winning-Numbers-Beginning-2010/d6yy-54nr" target="_blank" rel="noopener">NY Open Data feed</a>,
+      then checks the results for patterns and tests whether any strategy predicts the next draw.</p>
+    <p id="status" class="status" role="status">Loading draw history…</p>
+  </header>
+
+  <main class="wrap" id="app" hidden>
+    <section class="card verdict" id="verdict"></section>
+
+    <section class="card">
+      <h2>Is there a formula behind the draw?</h2>
+      <p>There isn't one to solve. Powerball numbers aren't computed by software. Each draw is a
+        live physical event: two gravity-pick machines mix numbered balls, and the lottery
+        audits them. Nothing links one draw to the next, so no seed, equation or hidden state is
+        there to reverse-engineer. The sections below test that claim against the real data
+        instead of taking it on trust. If the machines were biased or had "memory", these tests would catch it.</p>
+      <div class="kpis" id="kpis"></div>
+    </section>
+
+    <section class="card">
+      <h2>1 · Are some white balls drawn more often?</h2>
+      <p class="sub" id="white-sub"></p>
+      <div class="chart" id="chart-white"></div>
+    </section>
+
+    <section class="card">
+      <h2>2 · Are some Powerballs drawn more often?</h2>
+      <p class="sub" id="pb-sub"></p>
+      <div class="chart" id="chart-pb"></div>
+    </section>
+
+    <section class="card">
+      <h2>3 · Do the sums follow pure chance?</h2>
+      <p class="sub" id="sum-sub"></p>
+      <div class="chart" id="chart-sum"></div>
+    </section>
+
+    <section class="card">
+      <h2>4 · Does a draw remember the one before it?</h2>
+      <p class="sub" id="mem-sub"></p>
+      <div class="chart" id="chart-acf"></div>
+    </section>
+
+    <section class="card">
+      <h2>5 · Odd/even and low/high balance</h2>
+      <div id="parity"></div>
+    </section>
+
+    <section class="card">
+      <h2>6 · Backtest: can any strategy predict the next draw?</h2>
+      <p class="sub">Each strategy "predicted" every past draw using only the draws that came before it.
+        Random guessing averages <strong id="bt-exp"></strong> white-ball matches per ticket.</p>
+      <div class="table-scroll"><table id="backtest"></table></div>
+    </section>
+
+    <section class="card">
+      <h2>Summary of all tests</h2>
+      <div class="table-scroll"><table id="tests"></table></div>
+      <p class="note">Each test asks whether the data looks different from a fair random draw. A p-value
+        below 0.05 would be a flag. With this many tests, about 1 in 20 will fall below 0.05 by chance, so a lone flag
+        is expected noise (see the Bonferroni column).</p>
+    </section>
+
+    <section class="card next" id="next">
+      <h2 id="next-title"></h2>
+      <p class="sub">Every combination has the same
+        <strong id="odds"></strong> chance of winning the jackpot. The tests above show nothing in the data can raise it.
+        These tickets are drawn with your browser's cryptographic random number generator.</p>
+      <div class="tickets" id="tickets"></div>
+      <div class="row">
+        <button id="btn-random" type="button">New random ticket</button>
+        <button id="btn-smart" type="button">New less-popular ticket</button>
+      </div>
+      <p class="note">A less-popular ticket has the same odds of winning. It skips the combinations
+        many people play (all birthday numbers ≤ 31, runs like 1‑2‑3), so if it does hit, you're less likely to
+        split the jackpot. That's the only edge the math actually allows.</p>
+      <details>
+        <summary>What the "pattern" strategies would pick for this draw</summary>
+        <p class="note">For comparison only. Section 6 shows these perform the same as chance.</p>
+        <div class="tickets" id="strategy-tickets"></div>
+      </details>
+    </section>
+
+    <section class="card">
+      <h2>Search every draw</h2>
+      <div class="row">
+        <label>Contains number(s)
+          <input id="q" type="text" inputmode="numeric" placeholder="e.g. 7 23" autocomplete="off">
+        </label>
+        <label>Powerball
+          <input id="qpb" type="number" min="1" max="39" placeholder="any">
+        </label>
+        <label>From <input id="qfrom" type="date"></label>
+        <label>To <input id="qto" type="date"></label>
+      </div>
+      <p class="sub" id="search-count"></p>
+      <div class="table-scroll tall"><table id="draws"></table></div>
+    </section>
+
+    <section class="card">
+      <h2>Due numbers (for context)</h2>
+      <p class="sub">How many draws since each number last appeared. The balls don't know this.
+        A number that hasn't come up in a while has exactly the same chance next draw as any other.</p>
+      <div class="chart" id="chart-gap"></div>
+    </section>
+
+    <footer class="note">Data: New York State Gaming Commission via data.ny.gov (free, public, no key), fetched live
+      on each load. Analysis uses the current 5/69 + 1/26 game (7 Oct 2015 onward). The search covers every draw in the feed.
+      <span id="data-range"></span> For fun and education. Play responsibly: in the U.S., call 1‑800‑GAMBLER.</footer>
+  </main>
+
+  <div id="tip" class="tip" hidden></div>
+  <script src="src/stats.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
